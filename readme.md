@@ -84,7 +84,7 @@ The output bundle will be generated inside the `dist/` directory.
 
 ## 📬 Contact & Connect
 
-- **Portfolio:** [roshandhiman.vercel.app](https://roshandhiman.vercel.app)
+- **Portfolio:** [roshandhiman.vercel.app](roshandhiman-portfolio.vercel.app)
 - **LinkedIn:** [linkedin.com/in/roshandhiman](https://www.linkedin.com/in/roshandhiman)
 - **GitHub:** [github.com/roshandhiman](https://github.com/roshandhiman)
 - **Email:** [roshanpreetsinghdhiman@gmail.com](mailto:roshanpreetsinghdhiman@gmail.com)
