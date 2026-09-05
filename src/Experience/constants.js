@@ -27,7 +27,7 @@ export const CRT_UNIFORMS = {
   uBrightness: 2.5,
   uVignetteRoundness: 1,
 };
-export const ARCADE_IFRAME_SRC = "https://joan-arcade-machine.vercel.app";
+export const ARCADE_IFRAME_SRC = "./monitors/arcade.html";
 export const ARCADE_IFRAME_PADDING = "16px";
 export const ARCADE_MACHINE_CAMERA_POSITION = new Vector3(-1.7, 5.5, 2.3009);
 export const ARCADE_MACHINE_CAMERA_QUATERNION = new Quaternion(
@@ -88,7 +88,7 @@ export const LEFT_MONITOR_CSS_OBJECT_POSITION = new Vector3(
   -4.23009
 );
 export const LEFT_MONITOR_CSS_OBJECT_SCALE = new Vector3(0.00102, 0.00102, 1);
-export const LEFT_MONITOR_IFRAME_SRC = "https://joan-os.vercel.app";
+export const LEFT_MONITOR_IFRAME_SRC = "./monitors/about-os.html";
 export const LEFT_MONITOR_CAMERA_POSITION = new Vector3(1.06738, 2.60725, -1.6);
 export const LEFT_MONITOR_CAMERA_QUATERNION = new Quaternion(
   0,
@@ -111,7 +111,7 @@ export const RIGHT_MONITOR_CSS_OBJECT_POSITION = new Vector3(
 
 export const RIGHT_MONITOR_CSS_OBJECT_SCALE = new Vector3(0.00102, 0.00102, 1);
 export const RIGHT_MONITOR_CSS_OBJECT_ROTATION_Y = (-7.406 * Math.PI) / 180;
-export const RIGHT_MONITOR_IFRAME_SRC = "https://joan-art-gallery.vercel.app";
+export const RIGHT_MONITOR_IFRAME_SRC = "./monitors/projects.html";
 export const RIGHT_MONITOR_CAMERA_POSITION = new Vector3(
   2.13997,
   2.60716,
@@ -134,7 +134,6 @@ export const ELEMENTS_TO_RAYCAST = [
   "rubikGroup",
   "linkedin",
   "github",
-  "itchio",
   "arcadeMachine",
   "arcadeMachineScreen",
   "leftMonitor",
@@ -183,9 +182,8 @@ export const RUBIK_POSITION = new Vector3(-0.67868, 1.499, -3.92849);
 export const RUBIK_SCALE = 0.021432;
 
 // Links
-export const LINKEDIN_URL = "https://www.linkedin.com/in/joan-ramos-refusta/";
-export const GITHUB_URL = "https://github.com/jrefusta";
-export const ITCHIO_URL = "https://jrefusta.itch.io/";
+export const LINKEDIN_URL = "https://www.linkedin.com/in/roshandhiman";
+export const GITHUB_URL = "https://github.com/roshandhiman";
 
 // Top Chair
 export const TOP_CHAIR_POSITION = new Vector3(1.4027, 0.496728, -1.21048);

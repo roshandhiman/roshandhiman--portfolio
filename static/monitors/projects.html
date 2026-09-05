@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projects Matrix - Roshan Dhiman</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070e17;
+      --panel: rgba(14, 25, 41, 0.92);
+      --panel-border: rgba(56, 189, 248, 0.2);
+      --primary: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.35);
+      --accent: #f59e0b;
+      --accent-glow: rgba(245, 158, 11, 0.3);
+      --purple: #c084fc;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --card-bg: rgba(20, 36, 60, 0.7);
+      --card-hover: rgba(28, 52, 88, 0.85);
+      --success: #34d399;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background: radial-gradient(circle at 60% 20%, #0d2542 0%, #06111f 70%, #02070e 100%);
+    }
+
+    /* Ambient cyber grid */
+    .cyber-grid {
+      position: absolute;
+      inset: 0;
+      background-size: 32px 32px;
+      background-image: 
+        linear-gradient(to right, rgba(56, 189, 248, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Top Filter Header */
+    .header-bar {
+      flex-shrink: 0;
+      height: 56px;
+      width: 100%;
+      background: rgba(10, 20, 35, 0.96);
+      border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 10;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      gap: 12px;
+      box-sizing: border-box;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header-count {
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      color: #041221;
+      font-weight: 900;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 12px;
+    }
+    
+    /* Category Filter Tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+    }
+    .filter-btn {
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      color: #cbd5e1;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--primary);
+      color: #041221;
+      border-color: var(--primary);
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    /* Search Box */
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: rgba(14, 25, 41, 0.8);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 6px;
+      padding: 4px 10px;
+      gap: 6px;
+      width: 220px;
+    }
+    .search-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-size: 12px;
+      font-family: inherit;
+      width: 100%;
+    }
+
+    /* Projects Grid Container */
+    .projects-container {
+      flex: 1;
+      width: 100%;
+      height: calc(100% - 56px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 18px 24px 60px 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 16px;
+      align-content: start;
+      z-index: 1;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+    .projects-container::-webkit-scrollbar {
+      width: 8px;
+    }
+    .projects-container::-webkit-scrollbar-track {
+      background: rgba(8, 16, 28, 0.7);
+    }
+    .projects-container::-webkit-scrollbar-thumb {
+      background: rgba(56, 189, 248, 0.45);
+      border-radius: 6px;
+    }
+    .projects-container::-webkit-scrollbar-thumb:hover {
+      background: var(--primary);
+    }
+
+    /* Project Card */
+    .proj-card {
+      background: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      backdrop-filter: blur(12px);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+    .proj-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--purple), var(--accent));
+      opacity: 0.6;
+      transition: opacity 0.25s;
+    }
+    .proj-card:hover {
+      transform: translateY(-3px);
+      background: var(--card-hover);
+      border-color: rgba(56, 189, 248, 0.5);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5), 0 0 16px var(--primary-glow);
+    }
+    .proj-card:hover::before {
+      opacity: 1;
+    }
+
+    /* Card header */
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+    .card-tag {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--primary);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+    .proj-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 3px;
+    }
+    .proj-subtitle {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .proj-desc {
+      font-size: 11.5px;
+      color: #cbd5e1;
+      line-height: 1.45;
+      margin-bottom: 12px;
+      flex: 1;
+    }
+
+    /* Highlights list */
+    .proj-highlights {
+      list-style: none;
+      margin-bottom: 12px;
+      padding-left: 0;
+    }
+    .proj-highlights li {
+      font-size: 10.5px;
+      color: #94a3b8;
+      line-height: 1.4;
+      position: relative;
+      padding-left: 12px;
+      margin-bottom: 4px;
+    }
+    .proj-highlights li::before {
+      content: '▹';
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+    }
+
+    /* Tech Stack Badges */
+    .tech-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+    .tech-pill {
+      font-family: 'Fira Code', monospace;
+      font-size: 9.5px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #93c5fd;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Action Buttons */
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 10px;
+    }
+    .card-btn {
+      flex: 1;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .btn-github {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+    .btn-github:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .btn-demo {
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      color: #041221;
+      border: none;
+    }
+    .btn-demo:hover {
+      background: linear-gradient(135deg, #38bdf8, #7dd3fc);
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    /* Details Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 12, 0.85);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+    .modal-box {
+      background: var(--panel);
+      border: 1px solid var(--primary);
+      border-radius: 12px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 20px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+      animation: zoomIn 0.25s ease-out;
+    }
+    @keyframes zoomIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="cyber-grid"></div>
+
+  <div class="header-bar">
+    <div class="header-left">
+      <div class="header-title">
+        <span>PROJECTS MATRIX</span>
+        <span class="header-count" id="projCount">13</span>
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-btn active" onclick="filterCategory('ai', this)">AI / LLMs</button>
+        <button class="filter-btn" onclick="filterCategory('vision', this)">Computer Vision</button>
+        <button class="filter-btn" onclick="filterCategory('desktop', this)">Desktop Runtimes</button>
+        <button class="filter-btn" onclick="filterCategory('security', this)">Cybersecurity</button>
+        <button class="filter-btn" onclick="filterCategory('web', this)">Web Apps</button>
+      </div>
+    </div>
+    <div class="header-right" style="display: flex; gap: 8px; align-items: center;">
+      <div class="search-box">
+        <span style="color: var(--text-muted); font-size: 12px;">🔍</span>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search by title, tech or keyword..." oninput="handleSearch()" />
+      </div>
+      <button onclick="window.top.open('/resume.pdf', '_blank')" style="background: linear-gradient(135deg, #0284c7, #38bdf8); color: #041221; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 800; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 5px; white-space: nowrap; box-shadow: 0 2px 10px rgba(56, 189, 248, 0.3);">
+        📄 Resume.pdf ↗
+      </button>
+    </div>
+  </div>
+
+  <div class="projects-container" id="projectsGrid"></div>
+
+  <div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
+    <div class="modal-box" id="modalBox">
+      
+    </div>
+  </div>
+
+  <script>
+    // Audio trigger forwarder to Three.js world
+    function triggerAudio(soundName) {
+      window.parent.postMessage(soundName, '*');
+    }
+
+    const projectsData = [
+      {
+        id: 1,
+        title: "Autonomous AI Creator (Ada)",
+        subtitle: "24/7 AI Security Researcher",
+        category: "ai",
+        badge: "AI / LLM",
+        desc: "An autonomous AI security persona that discovers real-time tech news/research, evaluates stories with strict editorial judgment, and publishes analytical posts independently.",
+        highlights: [
+          "Aggregates real-time news from Google News RSS, arXiv research, and Hacker News API.",
+          "Maintains deduplication history with Supabase and runs natively on Vercel Cron.",
+          "Features a clock-synchronized live feed UI showing publishing rationale."
+        ],
+        tech: ["Next.js 14", "TypeScript", "Supabase", "Groq API", "Tailwind CSS", "PostgreSQL"],
+        github: "https://github.com/roshandhiman/autonomous-ai-persona",
+        demo: null
+      },
+      {
+        id: 2,
+        title: "Friday Desktop",
+        subtitle: "Electron & Local LLM macOS Assistant",
+        category: "desktop",
+        badge: "Desktop / AI",
+        desc: "Engineered a fully offline, voice-controlled desktop assistant for macOS with an Electron + React frontend and FastAPI WebSocket backend; runs Gemma 2 (2B) locally via Ollama — zero API keys required.",
+        highlights: [
+          "Integrated faster-whisper speech-to-text, native macOS TTS, and 7 system commands (app launch, Spotify, screenshot, WhatsApp, file creation).",
+          "Designed an interactive WebGL particle orb with state-driven animations responding to speech patterns."
+        ],
+        tech: ["Electron.js", "React.js", "FastAPI", "Ollama (Gemma 2)", "Python", "WebSocket"],
+        github: "https://github.com/roshandhiman/friday-desktop",
+        demo: null
+      },
+      {
+        id: 3,
+        title: "TriageAI",
+        subtitle: "Trauma ER Dashboard",
+        category: "ai",
+        badge: "Healthcare AI",
+        desc: "Developed a Level-1 Trauma ER triage dashboard with animated ECG/SpO2 waveforms at 60 fps on HTML5 Canvas and a rule-based clinical engine classifying patients as CRITICAL, SERIOUS, or STABLE.",
+        highlights: [
+          "Compiled the full React 19 app into a zero-dependency 289 KB offline HTML bundle via a custom Vite pipeline.",
+          "Synthesized acoustic clinical alerts and warning alarms dynamically through the Web Audio API."
+        ],
+        tech: ["React 19", "TypeScript", "Vite", "HTML5 Canvas", "Web Audio API", "Tailwind"],
+        github: "https://github.com/roshandhiman/triageai",
+        demo: null
+      },
+      {
+        id: 4,
+        title: "Air Steering Wheel",
+        subtitle: "OpenCV & MediaPipe Hand Tracking",
+        category: "vision",
+        badge: "Computer Vision",
+        desc: "An OpenCV & MediaPipe powered virtual hand-tracking steering wheel allowing controller-free gesture steering for laptop racing games.",
+        highlights: [
+          "Tracks left/right hand positions using webcam to simulate keyboard inputs.",
+          "Features dynamic HUD overlay showing angle gauge and WASD indicators."
+        ],
+        tech: ["Python", "OpenCV", "MediaPipe", "PyAutoGUI", "Bash"],
+        github: "https://github.com/roshandhiman/airsteer",
+        demo: null
+      },
+      {
+        id: 5,
+        title: "GesturePlay AI",
+        subtitle: "6 Gesture-Controlled Arcade Games",
+        category: "vision",
+        badge: "CV / Gaming",
+        desc: "Created 6 gesture-controlled arcade games powered by Google MediaPipe hand-landmark detection for controller-free, webcam-based gaming.",
+        highlights: [
+          "Implemented a zero-dependency audio engine with Web Audio API oscillators.",
+          "Crafted a dark-mode glassmorphism UI with persistent local high-score storage."
+        ],
+        tech: ["Vanilla JS", "MediaPipe", "Web Audio API", "HTML5 Canvas", "CSS3"],
+        github: "https://github.com/roshandhiman/gestureplay",
+        demo: "https://gestureplay-three.vercel.app/"
+      },
+      {
+        id: 6,
+        title: "Fearless Invest (Feargon)",
+        subtitle: "Fintech SaaS Simulator with Gemini Advisor",
+        category: "ai",
+        badge: "Fintech / AI",
+        desc: "Architected a fintech SaaS simulator featuring a Gemini 2.5 Flash advisor that explains market movements and prevents panic selling.",
+        highlights: [
+          "Adapts investment guidance to individual risk profiles via CoinGecko and Yahoo Finance API feeds.",
+          "Rendered live stock/crypto charts on Canvas with multi-currency support and Supabase auth."
+        ],
+        tech: ["Vanilla JS", "Node.js", "Supabase", "Gemini 2.5 Flash", "PostgreSQL"],
+        github: "https://github.com/roshandhiman/feargon",
+        demo: "https://feargon.vercel.app/#/"
+      },
+      {
+        id: 7,
+        title: "NagarSeva",
+        subtitle: "Civic Engagement & AI Command Center",
+        category: "web",
+        badge: "Fullstack / AI",
+        desc: "Built a full-stack civic engagement platform bridging citizens and municipal authorities — geo-tag infrastructure issues while admins track and resolve them via a real-time command center.",
+        highlights: [
+          "Integrated Groq-powered NagBot AI chatbot and Llama 3.2 Vision for auto-classifying issue photos.",
+          "Shipped Web Speech voice reporting, Haversine GPS sorting, and Leaflet heatmap clusters."
+        ],
+        tech: ["Vite", "JavaScript", "Supabase", "Leaflet.js", "Groq API", "Llama 3.2 Vision"],
+        github: "https://github.com/roshandhiman/NagarSeva",
+        demo: "https://nagar-seva-zeta.vercel.app"
+      },
+      {
+        id: 8,
+        title: "GitStatCard",
+        subtitle: "Cyber-Styled GitHub Profile Badges",
+        category: "web",
+        badge: "Developer Tool",
+        desc: "Interactive stats card builder letting users generate cyber-styled profile badges with multiple themes.",
+        highlights: [
+          "Offers Titan Obsidian, Cyber Center, Futuristic, and Classic Dark themes.",
+          "Supports markdown output copy and direct SVG card image generation."
+        ],
+        tech: ["React", "Vite", "Python", "FastAPI", "CSS3"],
+        github: "https://github.com/roshandhiman/gitstatcard",
+        demo: "https://gitstatcard.vercel.app"
+      },
+      {
+        id: 9,
+        title: "P95.AI",
+        subtitle: "B2B Lead Enrichment Platform",
+        category: "ai",
+        badge: "AI / SaaS",
+        desc: "Enriches 200+ B2B leads from 6 platforms with a 5-factor ICP scoring model, auto-generating personalised cold emails and LinkedIn outreach.",
+        highlights: [
+          "Shipped A/B testing (2 variants per lead) and 4-language i18n support (EN/HI/ES/FR).",
+          "Presented at the ThinkRoot x Vortex Hackathon 2026."
+        ],
+        tech: ["React.js", "Vite", "Tailwind CSS", "Express.js", "SQLite", "Gemini API"],
+        github: "https://github.com/roshandhiman",
+        demo: null
+      },
+      {
+        id: 10,
+        title: "Mac Live Wallpaper",
+        subtitle: "Native macOS MP4 Wallpaper Engine",
+        category: "desktop",
+        badge: "macOS Native",
+        desc: "Published a native macOS utility using AVFoundation layers to loop any MP4 video as a seamless, high-performance desktop wallpaper.",
+        highlights: [
+          "Designed for Apple Silicon (M1-M4) and macOS 13+ with extremely low CPU overhead and power optimization."
+        ],
+        tech: ["Swift", "AppKit", "AVFoundation", "Xcode"],
+        github: "https://github.com/roshandhiman/Mac-Live-Wallpaper",
+        demo: null
+      },
+      {
+        id: 11,
+        title: "DoS Attack Simulator",
+        subtitle: "Cybersecurity Lab Stress Tester",
+        category: "security",
+        badge: "Cybersecurity",
+        desc: "Educational cybersecurity lab tool demonstrating network traffic flooding and packet-based stress-testing vectors in controlled lab environments.",
+        highlights: [
+          "Interactive Linux terminal script with multi-vector traffic simulations.",
+          "Demonstrates packet crafting and firewall rule testing with hping3/iptables."
+        ],
+        tech: ["Bash", "Linux", "hping3", "netcat", "iptables"],
+        github: "https://github.com/roshandhiman/dos_attack",
+        demo: null
+      },
+      {
+        id: 12,
+        title: "Make You Invisible",
+        subtitle: "Background Subtraction & Masking",
+        category: "vision",
+        badge: "Computer Vision",
+        desc: "Built a Python script using OpenCV and MediaPipe that uses your webcam to make you invisible in live video streams in real-time.",
+        highlights: [
+          "Employs dynamic background subtraction and body masking algorithms."
+        ],
+        tech: ["Python", "OpenCV", "MediaPipe", "Bash"],
+        github: "https://github.com/roshandhiman/makeyouinvisible",
+        demo: null
+      },
+      {
+        id: 13,
+        title: "ExamCode",
+        subtitle: "React & Vite Coding Playground",
+        category: "web",
+        badge: "Web Tool",
+        desc: "A React-based sandbox and coding platform template optimized for executing and organizing programming exam solutions with fast HMR.",
+        highlights: [
+          "Configured with Oxlint guidelines and lightning-fast Vite compilation.",
+          "Structured for rapid coding exercise validation."
+        ],
+        tech: ["React", "Vite", "TypeScript", "Oxlint", "CSS3"],
+        github: "https://github.com/roshandhiman/ExamCode",
+        demo: null
+      }
+    ];
+
+    let currentFilter = 'ai';
+    let searchQuery = '';
+
+    function renderProjects() {
+      const grid = document.getElementById('projectsGrid');
+      grid.innerHTML = '';
+
+      const filtered = projectsData.filter(p => {
+        const matchesCat = currentFilter === 'all' || p.category === currentFilter;
+        const matchesSearch = !searchQuery || 
+          p.title.toLowerCase().includes(searchQuery) ||
+          p.subtitle.toLowerCase().includes(searchQuery) ||
+          p.desc.toLowerCase().includes(searchQuery) ||
+          p.tech.some(t => t.toLowerCase().includes(searchQuery));
+        return matchesCat && matchesSearch;
+      });
+
+      document.getElementById('projCount').textContent = filtered.length;
+
+      filtered.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'proj-card';
+        card.innerHTML = `
+          <div>
+            <div class="card-top">
+              <span class="card-tag">${p.badge}</span>
+            </div>
+            <h2 class="proj-title">${p.title}</h2>
+            <div class="proj-subtitle">${p.subtitle}</div>
+            <p class="proj-desc">${p.desc}</p>
+            <ul class="proj-highlights">
+              ${p.highlights.map(h => `<li>${h}</li>`).join('')}
+            </ul>
+          </div>
+          <div>
+            <div class="tech-badges">
+              ${p.tech.map(t => `<span class="tech-pill">${t}</span>`).join('')}
+            </div>
+            <div class="card-actions">
+              <button class="card-btn btn-github" data-url="${p.github}">
+                <span>🐙 GitHub Repo</span>
+              </button>
+              ${p.demo ? `
+                <button class="card-btn btn-demo" data-url="${p.demo}">
+                  <span>⚡ Live Demo</span>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+
+        // Attach click handlers that work inside iframes
+        card.querySelectorAll('[data-url]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const url = btn.getAttribute('data-url');
+            if (!url) return;
+            triggerAudio(btn.classList.contains('btn-demo') ? 'start' : 'trophy');
+            try {
+              window.top.open(url, '_blank');
+            } catch(err) {
+              try {
+                window.parent.open(url, '_blank');
+              } catch(err2) {
+                window.open(url, '_blank');
+              }
+            }
+          });
+        });
+
+        grid.appendChild(card);
+      });
+    }
+
+    function filterCategory(cat, btn) {
+      currentFilter = cat;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      triggerAudio('footstep01');
+      renderProjects();
+    }
+
+    function handleSearch() {
+      searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+      renderProjects();
+    }
+
+    // Initial render
+    renderProjects();
+  </script>
+</body>
+</html>

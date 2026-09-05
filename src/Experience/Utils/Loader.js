@@ -25,6 +25,7 @@ export default class Resources extends EventEmitter {
     super();
     this.banner = document.querySelector(".banner");
     this.loadingScreen = document.querySelector(".loadingScreen");
+    this.startHint = document.querySelector(".start-hint");
     this.audioButton = document.querySelector(".audio-button");
     this.loadingScreen.classList.add("show-loading-screen");
 
@@ -49,7 +50,7 @@ export default class Resources extends EventEmitter {
 
     // Images
     this.loaders.push({
-      extensions: ["jpg", "png"],
+      extensions: ["jpg", "png", "jpeg", "webp", "svg"],
       action: (_resource) => {
         const image = new Image();
 
@@ -242,12 +243,19 @@ export default class Resources extends EventEmitter {
         this.loadingScreen.classList.add("loading-screen-hover");
         this.loadingScreen.classList.remove("finished-load");
 
+        if (this.startHint) {
+          this.startHint.classList.add("show-start-hint");
+        }
+
         const clickHandler = () => {
           const audioManager = this.experience.world.audioManager;
           audioManager.playSingleAudio("start", 0.4);
           audioManager.playLoopAudio("floral", 0.1);
           this.audioButton.classList.add("show-audio-button");
           this.loadingScreen.classList.remove("show-loading-screen");
+          if (this.startHint) {
+            this.startHint.classList.remove("show-start-hint");
+          }
           this.removeOverlay();
           this.loadingScreen.removeEventListener("click", clickHandler);
         };

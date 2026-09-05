@@ -99,6 +99,8 @@ export default class LeftMonitorScreen {
   }
 
   activateControls() {
+    if (this.cssLeftMonitor) this.cssLeftMonitor.style.pointerEvents = "auto";
+    if (this.webglElement) this.webglElement.style.pointerEvents = "none";
     window.addEventListener("pointermove", this.onMouseMove, false);
     window.addEventListener("message", this.receiveMessage, false);
     this.onMouseMove();
@@ -106,6 +108,8 @@ export default class LeftMonitorScreen {
   }
 
   deactivateControls() {
+    if (this.cssLeftMonitor) this.cssLeftMonitor.style.pointerEvents = "none";
+    if (this.webglElement) this.webglElement.style.pointerEvents = "auto";
     window.removeEventListener("pointermove", this.onMouseMove, false);
     window.removeEventListener("message", this.receiveMessage, false);
     this.isActive = false;

@@ -154,6 +154,9 @@ export default class ArcadeScreen {
   };
 
   activateControls = () => {
+    const el = document.getElementById("cssArcadeMachine");
+    if (el) el.style.pointerEvents = "auto";
+    if (this.webglElement) this.webglElement.style.pointerEvents = "none";
     window.addEventListener("keydown", this.handleKeyDownParent);
     window.addEventListener("keyup", this.handleKeyUpParent);
     window.addEventListener("pointermove", this.onMouseMove);
@@ -161,6 +164,9 @@ export default class ArcadeScreen {
     this.onMouseMove();
   };
   deactivateControls = () => {
+    const el = document.getElementById("cssArcadeMachine");
+    if (el) el.style.pointerEvents = "none";
+    if (this.webglElement) this.webglElement.style.pointerEvents = "auto";
     window.removeEventListener("keydown", this.handleKeyDownParent);
     window.removeEventListener("keyup", this.handleKeyUpParent);
     window.removeEventListener("pointermove", this.onMouseMove);

@@ -88,6 +88,13 @@ export default class Whiteboard {
         this.drawingCanvas.height
       );
 
+      this.drawingContext.fillStyle = "white";
+      this.drawingContext.fillRect(1450, 720, 580, 290);
+
+      this.drawingContext.font = "bold 64px 'Saeada', sans-serif";
+      this.drawingContext.fillStyle = "#e11d48";
+      this.drawingContext.fillText("Roshan.", 1660, 900);
+
       this.canvasTexture = new CanvasTexture(this.drawingCanvas);
 
       this.canvasTexture.anisotropy =

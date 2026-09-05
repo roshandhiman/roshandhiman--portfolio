@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RoshanOS v3.0 Desktop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #060d17;
+      --panel: rgba(13, 23, 38, 0.94);
+      --panel-border: rgba(56, 189, 248, 0.22);
+      --primary: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.4);
+      --accent: #f59e0b;
+      --purple: #c084fc;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #34d399;
+      --card-bg: rgba(19, 34, 56, 0.75);
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background: radial-gradient(circle at 50% 10%, #0f2b4c 0%, #071322 65%, #02070e 100%);
+    }
+
+    /* Ambient wallpaper pattern */
+    .desktop-bg {
+      position: absolute;
+      inset: 0;
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(56, 189, 248, 0.035) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(56, 189, 248, 0.035) 1px, transparent 1px);
+      pointer-events: none;
+    }
+
+    /* Top Menu Bar */
+    .topbar {
+      height: 34px;
+      background: rgba(10, 20, 35, 0.92);
+      border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      font-size: 12px;
+      font-weight: 600;
+      z-index: 100;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .os-logo {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--primary);
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+    }
+    .topbar-menu {
+      display: flex;
+      gap: 8px;
+    }
+    .topbar-item {
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 3px 8px;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+    .topbar-item:hover {
+      color: #fff;
+      background: rgba(56, 189, 248, 0.15);
+    }
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-family: 'Fira Code', monospace;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--success);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--success);
+      display: inline-block;
+    }
+
+    /* Desktop Surface */
+    .desktop-area {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+    }
+
+    /* Desktop Shortcuts Column */
+    .desktop-icons {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 16px 14px;
+      z-index: 2;
+    }
+    .desktop-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 76px;
+      padding: 6px 4px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    .desktop-icon:hover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: rgba(56, 189, 248, 0.3);
+      transform: translateY(-2px);
+    }
+    .icon-img {
+      font-size: 28px;
+      margin-bottom: 4px;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+    }
+    .icon-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #f1f5f9;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+      line-height: 1.2;
+    }
+
+    /* Window System */
+    .os-window {
+      position: absolute;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6), 0 0 1px rgba(56, 189, 248, 0.4);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+      z-index: 10;
+      min-width: 320px;
+      min-height: 240px;
+      transition: box-shadow 0.2s, opacity 0.2s;
+    }
+    .os-window.active {
+      border-color: var(--primary);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.7), 0 0 18px var(--primary-glow);
+      z-index: 20;
+    }
+    .os-window.minimized {
+      display: none !important;
+    }
+
+    /* Window Header */
+    .win-header {
+      height: 34px;
+      background: rgba(18, 34, 56, 0.95);
+      border-bottom: 1px solid rgba(56, 189, 248, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      cursor: grab;
+    }
+    .win-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .win-controls {
+      display: flex;
+      gap: 6px;
+    }
+    .win-btn {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .win-btn:hover {
+      transform: scale(1.15);
+    }
+    .btn-close { background: #ef4444; }
+    .btn-min { background: #f59e0b; }
+    .btn-max { background: #10b981; }
+
+    /* Window Body */
+    .win-content {
+      flex: 1;
+      padding: 14px;
+      overflow-y: auto;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+    .win-content::-webkit-scrollbar {
+      width: 5px;
+    }
+    .win-content::-webkit-scrollbar-thumb {
+      background: rgba(56, 189, 248, 0.3);
+      border-radius: 4px;
+    }
+
+    /* Profile View */
+    .profile-hero {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      background: var(--card-bg);
+      border: 1px solid rgba(56, 189, 248, 0.18);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .profile-avatar {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      padding: 2px;
+      background: linear-gradient(135deg, var(--primary), var(--purple));
+      box-shadow: 0 0 16px var(--primary-glow);
+    }
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .profile-meta h2 {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .profile-meta p {
+      font-size: 11.5px;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Stats Grid */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .stat-pill {
+      background: var(--card-bg);
+      border: 1px solid rgba(56, 189, 248, 0.15);
+      border-radius: 8px;
+      padding: 8px 6px;
+      text-align: center;
+    }
+    .stat-val {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--accent);
+      font-family: 'Fira Code', monospace;
+    }
+    .stat-name {
+      font-size: 9.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    /* Section Cards */
+    .card-block {
+      background: var(--card-bg);
+      border: 1px solid rgba(56, 189, 248, 0.12);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+    .card-block-title {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Skills Pill Cloud */
+    .pill-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    .pill-tag {
+      font-family: 'Fira Code', monospace;
+      font-size: 10px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: #bae6fd;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .pill-tag.accent {
+      background: rgba(245, 158, 11, 0.12);
+      border-color: rgba(245, 158, 11, 0.35);
+      color: #fef08a;
+    }
+    .pill-tag.purple {
+      background: rgba(192, 132, 252, 0.12);
+      border-color: rgba(192, 132, 252, 0.35);
+      color: #f3e8ff;
+    }
+
+    /* Terminal Window Styles */
+    .term-screen {
+      background: #040810;
+      border-radius: 6px;
+      padding: 12px;
+      font-family: 'Fira Code', monospace;
+      font-size: 11.5px;
+      line-height: 1.55;
+      color: #34d399;
+      height: 100%;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .term-lines {
+      flex: 1;
+      overflow-y: auto;
+    }
+    .prompt {
+      color: var(--primary);
+    }
+    .term-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 6px;
+    }
+    .term-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      flex: 1;
+    }
+
+    /* Taskbar / Dock at bottom */
+    .taskbar {
+      height: 42px;
+      background: rgba(10, 20, 35, 0.95);
+      border-top: 1px solid rgba(56, 189, 248, 0.25);
+      backdrop-filter: blur(14px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      z-index: 100;
+    }
+    .start-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      color: #041221;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .start-btn:hover {
+      box-shadow: 0 0 12px var(--primary-glow);
+      transform: translateY(-1px);
+    }
+    .task-apps {
+      display: flex;
+      gap: 6px;
+      flex: 1;
+      margin-left: 14px;
+    }
+    .task-app-btn {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      color: #cbd5e1;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .task-app-btn.active {
+      background: rgba(56, 189, 248, 0.25);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    /* Start Menu Popup */
+    .start-menu {
+      position: absolute;
+      bottom: 48px;
+      left: 12px;
+      width: 280px;
+      background: var(--panel);
+      border: 1px solid var(--primary);
+      border-radius: 10px;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.7);
+      backdrop-filter: blur(20px);
+      display: none;
+      flex-direction: column;
+      padding: 10px;
+      gap: 6px;
+      z-index: 200;
+    }
+    .start-menu.open {
+      display: flex;
+    }
+    .start-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      color: #cbd5e1;
+      transition: all 0.15s;
+    }
+    .start-item:hover {
+      background: rgba(56, 189, 248, 0.2);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="desktop-bg"></div>
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="os-logo" onclick="toggleStartMenu()">
+        <span>⚡</span>
+        <span>ROSHAN_OS v3.0</span>
+      </div>
+      <div class="topbar-menu">
+        <div class="topbar-item" onclick="openWindow('winAbout')">About</div>
+        <div class="topbar-item" onclick="openWindow('winSkills')">Skills</div>
+        <div class="topbar-item" onclick="openWindow('winTerminal')">Terminal</div>
+        <div class="topbar-item" onclick="openWindow('winResume')">Resume</div>
+        <div class="topbar-item" onclick="switchMonitor()">🚀 Projects Matrix →</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span><span class="status-dot"></span> SYSTEMS ONLINE</span>
+      <span id="osClock">18:00:00 IST</span>
+    </div>
+  </div>
+
+  <div class="desktop-area">
+    <div class="desktop-icons">
+      <div class="desktop-icon" ondblclick="openWindow('winAbout')" onclick="selectIcon(this)">
+        <div class="icon-img">👤</div>
+        <div class="icon-label">About Me</div>
+      </div>
+      <div class="desktop-icon" ondblclick="openWindow('winSkills')" onclick="selectIcon(this)">
+        <div class="icon-img">⚡</div>
+        <div class="icon-label">Skills</div>
+      </div>
+      <div class="desktop-icon" ondblclick="openWindow('winTerminal')" onclick="selectIcon(this)">
+        <div class="icon-img">💻</div>
+        <div class="icon-label">Terminal</div>
+      </div>
+      <div class="desktop-icon" ondblclick="openWindow('winResume')" onclick="selectIcon(this)">
+        <div class="icon-img">📄</div>
+        <div class="icon-label">Resume.pdf</div>
+      </div>
+      <div class="desktop-icon" ondblclick="switchMonitor()" onclick="selectIcon(this)">
+        <div class="icon-img">🚀</div>
+        <div class="icon-label">Projects (13)</div>
+      </div>
+      <div class="desktop-icon" ondblclick="openWindow('winContact')" onclick="selectIcon(this)">
+        <div class="icon-img">✉️</div>
+        <div class="icon-label">Contact</div>
+      </div>
+    </div>
+
+    <div class="os-window active" id="winAbout" style="top: 20px; left: 110px; width: 440px; height: 490px;">
+      <div class="win-header" onmousedown="startDrag(event, 'winAbout')">
+        <div class="win-title"><span>👤</span> About — Roshanpreet Singh Dhiman</div>
+        <div class="win-controls">
+          <span class="win-btn btn-min" onclick="minimizeWindow('winAbout')"></span>
+          <span class="win-btn btn-max" onclick="maximizeWindow('winAbout')"></span>
+          <span class="win-btn btn-close" onclick="closeWindow('winAbout')"></span>
+        </div>
+      </div>
+      <div class="win-content">
+        <div class="profile-hero">
+          <div class="profile-avatar">
+            <img src="../assets/images/profile.jpeg" onerror="this.src='https://avatars.githubusercontent.com/u/104118335?v=4'" alt="Roshan Dhiman" />
+          </div>
+          <div class="profile-meta">
+            <h2>Roshanpreet S. Dhiman</h2>
+            <p>Full Stack Developer & AI Engineer</p>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">📍 Punjab, India • Chitkara University</div>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-pill"><div class="stat-val">13+</div><div class="stat-name">Projects</div></div>
+          <div class="stat-pill"><div class="stat-val">110+</div><div class="stat-name">LeetCode</div></div>
+          <div class="stat-pill"><div class="stat-val">30+</div><div class="stat-name">Tech Stack</div></div>
+          <div class="stat-pill"><div class="stat-val">100%</div><div class="stat-name">Systems AI</div></div>
+        </div>
+
+        <div class="card-block">
+          <div class="card-block-title">🎯 CORE PHILOSOPHY</div>
+          Building intelligent systems at the intersection of <strong>Local LLMs (Gemma 2, Llama 3.2 via Ollama)</strong>, <strong>Computer Vision (OpenCV, MediaPipe)</strong>, and <strong>High-Performance Desktop/Web Runtimes</strong>. Zero-API-key local voice assistants, trauma triage dashboards, and native macOS utilities.
+        </div>
+
+        <div class="card-block">
+          <div class="card-block-title">🎓 EDUCATION</div>
+          <strong>B.E. Computer Science & Engineering</strong><br>
+          Chitkara University, Rajpura, Punjab (2025–Present, 3rd Sem)<br>
+          <span style="color: var(--text-muted); font-size: 11px;">Focus: OS Internals, Algorithms, Distributed Runtimes, Custom Kernels.</span>
+        </div>
+
+        <button onclick="switchMonitor()" style="width: 100%; background: linear-gradient(135deg, #0284c7, #38bdf8); color: #041221; font-weight: 800; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 12px; box-shadow: 0 4px 14px var(--primary-glow);">
+          ⚡ ZOOM TO RIGHT MONITOR PROJECTS (13) →
+        </button>
+      </div>
+    </div>
+
+    <div class="os-window" id="winSkills" style="top: 30px; left: 570px; width: 420px; height: 470px;">
+      <div class="win-header" onmousedown="startDrag(event, 'winSkills')">
+        <div class="win-title"><span>⚡</span> Technical Arsenal & Stack</div>
+        <div class="win-controls">
+          <span class="win-btn btn-min" onclick="minimizeWindow('winSkills')"></span>
+          <span class="win-btn btn-max" onclick="maximizeWindow('winSkills')"></span>
+          <span class="win-btn btn-close" onclick="closeWindow('winSkills')"></span>
+        </div>
+      </div>
+      <div class="win-content">
+        <div class="card-block">
+          <div class="card-block-title">💻 PROGRAMMING LANGUAGES</div>
+          <div class="pill-flex">
+            <span class="pill-tag">Python</span><span class="pill-tag">C</span><span class="pill-tag">C++</span><span class="pill-tag">Java</span><span class="pill-tag">JavaScript</span><span class="pill-tag">TypeScript</span><span class="pill-tag">SQL</span><span class="pill-tag">Bash</span>
+          </div>
+        </div>
+
+        <div class="card-block">
+          <div class="card-block-title">🧠 AI, COMPUTER VISION & AUDIO</div>
+          <div class="pill-flex">
+            <span class="pill-tag accent">Local LLMs (Ollama)</span><span class="pill-tag accent">Gemma 2 / Llama 3.2</span><span class="pill-tag accent">OpenCV</span><span class="pill-tag accent">Google MediaPipe</span><span class="pill-tag accent">faster-whisper STT</span><span class="pill-tag accent">Web Audio API</span>
+          </div>
+        </div>
+
+        <div class="card-block">
+          <div class="card-block-title">🚀 RUNTIMES & FRAMEWORKS</div>
+          <div class="pill-flex">
+            <span class="pill-tag purple">React.js 19</span><span class="pill-tag purple">Next.js 14</span><span class="pill-tag purple">Electron.js</span><span class="pill-tag purple">FastAPI</span><span class="pill-tag purple">Node.js / Express</span><span class="pill-tag purple">Swift (AppKit)</span><span class="pill-tag purple">Vite</span><span class="pill-tag purple">Tailwind CSS</span><span class="pill-tag purple">Supabase</span>
+          </div>
+        </div>
+
+        <div class="card-block">
+          <div class="card-block-title">🛡️ SECURITY & OS INTERNALS</div>
+          <div class="pill-flex">
+            <span class="pill-tag">Ethical Hacking</span><span class="pill-tag">Kali Linux</span><span class="pill-tag">hping3</span><span class="pill-tag">iptables</span><span class="pill-tag">Socket Programming</span><span class="pill-tag">Custom Linux Kernel</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="os-window" id="winTerminal" style="top: 140px; left: 240px; width: 520px; height: 360px; display: none;">
+      <div class="win-header" onmousedown="startDrag(event, 'winTerminal')">
+        <div class="win-title"><span>💻</span> Terminal — roshan@arch-zenith</div>
+        <div class="win-controls">
+          <span class="win-btn btn-min" onclick="minimizeWindow('winTerminal')"></span>
+          <span class="win-btn btn-max" onclick="maximizeWindow('winTerminal')"></span>
+          <span class="win-btn btn-close" onclick="closeWindow('winTerminal')"></span>
+        </div>
+      </div>
+      <div class="win-content" style="padding: 0; height: calc(100% - 34px);">
+        <div class="term-screen">
+          <div class="term-lines" id="termHistory">
+            <div>RoshanOS Unix Core v3.0 (Darwin x86_64)</div>
+            <div>Type <span style="color:#fff;">'help'</span> or <span style="color:#fff;">'projects'</span> to zoom to Right Monitor.</div>
+            <div>&nbsp;</div>
+            <div><span class="prompt">roshan@darwin:~$</span> neofetch</div>
+            <div>Host: Apple M-Series Silicon | Kernel: 24.0.0 Darwin</div>
+            <div>Shipped: 13 Projects | LeetCode: 110+ Solved</div>
+          </div>
+          <div class="term-row">
+            <span class="prompt">roshan@darwin:~$</span>
+            <input type="text" id="termInput" class="term-input" placeholder="type help, projects, skills..." autocomplete="off" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="os-window" id="winResume" style="top: 30px; left: 240px; width: 580px; height: 500px; display: none;">
+      <div class="win-header" onmousedown="startDrag(event, 'winResume')">
+        <div class="win-title"><span>📄</span> Roshanpreet_Resume.pdf</div>
+        <div class="win-controls">
+          <span class="win-btn btn-min" onclick="minimizeWindow('winResume')"></span>
+          <span class="win-btn btn-max" onclick="maximizeWindow('winResume')"></span>
+          <span class="win-btn btn-close" onclick="closeWindow('winResume')"></span>
+        </div>
+      </div>
+      <div class="win-content" style="display: flex; flex-direction: column; gap: 8px; padding: 10px;">
+        <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; background: rgba(56, 189, 248, 0.08); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.2);">
+          <div style="font-size: 11.5px; font-weight: 800; color: #fff;">📄 Roshanpreet Singh Dhiman</div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <button onclick="window.top.open('/resume.pdf', '_blank')" style="background: linear-gradient(135deg, #0284c7, #38bdf8); color: #041221; border: none; padding: 5px 11px; border-radius: 5px; font-weight: 800; font-size: 11px; cursor: pointer;">
+              ↗ Open in New Tab
+            </button>
+            <a href="/resume.pdf" download="Roshanpreet_Resume.pdf" style="background: rgba(255,255,255,0.12); color: #fff; text-decoration: none; padding: 5px 9px; border-radius: 5px; font-weight: 600; font-size: 11px; display: inline-flex; align-items: center;">
+              ⬇ Download PDF
+            </a>
+          </div>
+        </div>
+        <div style="flex: 1; min-height: 380px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); background: #262626;">
+          <iframe src="/resume.pdf#toolbar=1" style="width: 100%; height: 100%; min-height: 380px; border: none; background: #fff;"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <div class="os-window" id="winContact" style="top: 100px; left: 400px; width: 380px; height: 380px; display: none;">
+      <div class="win-header" onmousedown="startDrag(event, 'winContact')">
+        <div class="win-title"><span>✉️</span> Contact Roshan</div>
+        <div class="win-controls">
+          <span class="win-btn btn-min" onclick="minimizeWindow('winContact')"></span>
+          <span class="win-btn btn-max" onclick="maximizeWindow('winContact')"></span>
+          <span class="win-btn btn-close" onclick="closeWindow('winContact')"></span>
+        </div>
+      </div>
+      <div class="win-content">
+        <div class="card-block">
+          <div class="card-block-title">DIRECT INBOX</div>
+          <a href="mailto:roshanpreetsinghdhiman@gmail.com" target="_blank" style="color: #fff; text-decoration: none; font-weight: 700;">
+            ✉️ roshanpreetsinghdhiman@gmail.com
+          </a>
+        </div>
+        <div class="card-block">
+          <div class="card-block-title">GITHUB PROFILE</div>
+          <a href="https://github.com/roshandhiman" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 700;">
+            🐙 github.com/roshandhiman
+          </a>
+        </div>
+        <div class="card-block">
+          <div class="card-block-title">LINKEDIN</div>
+          <a href="https://www.linkedin.com/in/roshandhiman" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 700;">
+            💼 linkedin.com/in/roshandhiman
+          </a>
+        </div>
+        <div class="card-block">
+          <div class="card-block-title">PHONE & LOCATION</div>
+          <p style="color: #fff;">📞 +91 96460-65409 • Punjab, India</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="start-menu" id="startMenu">
+    <div style="font-size: 11px; font-weight: 800; color: var(--primary); padding: 4px 8px;">ROSHAN OS APPS</div>
+    <div class="start-item" onclick="openWindow('winAbout'); toggleStartMenu();"><span>👤</span> About Roshan</div>
+    <div class="start-item" onclick="openWindow('winSkills'); toggleStartMenu();"><span>⚡</span> Skills Arsenal</div>
+    <div class="start-item" onclick="openWindow('winTerminal'); toggleStartMenu();"><span>💻</span> Terminal Shell</div>
+    <div class="start-item" onclick="openWindow('winResume'); toggleStartMenu();"><span>📄</span> View Resume</div>
+    <div class="start-item" onclick="switchMonitor(); toggleStartMenu();"><span>🚀</span> Projects Matrix (13)</div>
+    <div class="start-item" onclick="openWindow('winContact'); toggleStartMenu();"><span>✉️</span> Contact Dispatch</div>
+  </div>
+
+  <div class="taskbar">
+    <div class="start-btn" onclick="toggleStartMenu()">
+      <span>⚡</span>
+      <span>Start</span>
+    </div>
+    <div class="task-apps">
+      <div class="task-app-btn active" id="task_winAbout" onclick="toggleWindow('winAbout')">👤 About</div>
+      <div class="task-app-btn" id="task_winSkills" onclick="toggleWindow('winSkills')">⚡ Skills</div>
+      <div class="task-app-btn" id="task_winTerminal" onclick="toggleWindow('winTerminal')">💻 Terminal</div>
+      <div class="task-app-btn" id="task_winResume" onclick="toggleWindow('winResume')">📄 Resume</div>
+      <div class="task-app-btn" onclick="switchMonitor()">🚀 Projects (13)</div>
+    </div>
+    <div style="font-family: 'Fira Code', monospace; font-size: 11px; color: var(--text-muted);">
+      <span class="status-dot"></span> Online
+    </div>
+  </div>
+
+  <script>
+    // Audio forwarders
+    window.addEventListener('mousedown', () => window.parent.postMessage('mousedown', '*'));
+    window.addEventListener('mouseup', () => window.parent.postMessage('mouseup', '*'));
+
+    function switchMonitor() {
+      window.parent.postMessage('Projects', '*');
+    }
+
+    // Clock
+    setInterval(() => {
+      const d = new Date();
+      document.getElementById('osClock').textContent = d.toLocaleTimeString('en-US', { hour12: false }) + ' IST';
+    }, 1000);
+
+    // Window Management
+    function bringToFront(winId) {
+      document.querySelectorAll('.os-window').forEach(w => w.classList.remove('active'));
+      const win = document.getElementById(winId);
+      if (win) {
+        win.classList.add('active');
+      }
+      document.querySelectorAll('.task-app-btn').forEach(b => b.classList.remove('active'));
+      const taskBtn = document.getElementById('task_' + winId);
+      if (taskBtn) taskBtn.classList.add('active');
+    }
+
+    function openWindow(winId) {
+      const win = document.getElementById(winId);
+      if (!win) return;
+      win.style.display = 'flex';
+      win.classList.remove('minimized');
+      bringToFront(winId);
+    }
+
+    function closeWindow(winId) {
+      const win = document.getElementById(winId);
+      if (win) win.style.display = 'none';
+      const taskBtn = document.getElementById('task_' + winId);
+      if (taskBtn) taskBtn.classList.remove('active');
+    }
+
+    function minimizeWindow(winId) {
+      const win = document.getElementById(winId);
+      if (win) win.classList.add('minimized');
+      const taskBtn = document.getElementById('task_' + winId);
+      if (taskBtn) taskBtn.classList.remove('active');
+    }
+
+    function maximizeWindow(winId) {
+      const win = document.getElementById(winId);
+      if (!win) return;
+      if (win.dataset.maximized === 'true') {
+        win.style.top = win.dataset.origTop || '30px';
+        win.style.left = win.dataset.origLeft || '100px';
+        win.style.width = win.dataset.origWidth || '450px';
+        win.style.height = win.dataset.origHeight || '480px';
+        win.dataset.maximized = 'false';
+      } else {
+        win.dataset.origTop = win.style.top;
+        win.dataset.origLeft = win.style.left;
+        win.dataset.origWidth = win.style.width;
+        win.dataset.origHeight = win.style.height;
+        win.style.top = '5px';
+        win.style.left = '5px';
+        win.style.width = 'calc(100% - 10px)';
+        win.style.height = 'calc(100% - 10px)';
+        win.dataset.maximized = 'true';
+      }
+    }
+
+    function toggleWindow(winId) {
+      const win = document.getElementById(winId);
+      if (!win) return;
+      if (win.style.display === 'none' || win.classList.contains('minimized')) {
+        openWindow(winId);
+      } else if (win.classList.contains('active')) {
+        minimizeWindow(winId);
+      } else {
+        bringToFront(winId);
+      }
+    }
+
+    function toggleStartMenu() {
+      document.getElementById('startMenu').classList.toggle('open');
+    }
+
+    function selectIcon(el) {
+      document.querySelectorAll('.desktop-icon').forEach(i => i.style.background = 'transparent');
+      el.style.background = 'rgba(56, 189, 248, 0.2)';
+    }
+
+    // Dragging Logic
+    let isDragging = false;
+    let currentDragWin = null;
+    let dragOffsetX = 0, dragOffsetY = 0;
+
+    function startDrag(e, winId) {
+      if (e.target.classList.contains('win-btn')) return;
+      bringToFront(winId);
+      isDragging = true;
+      currentDragWin = document.getElementById(winId);
+      const rect = currentDragWin.getBoundingClientRect();
+      dragOffsetX = e.clientX - rect.left;
+      dragOffsetY = e.clientY - rect.top;
+      window.addEventListener('mousemove', onDrag);
+      window.addEventListener('mouseup', stopDrag);
+    }
+
+    function onDrag(e) {
+      if (!isDragging || !currentDragWin) return;
+      const x = Math.max(0, Math.min(window.innerWidth - 100, e.clientX - dragOffsetX));
+      const y = Math.max(34, Math.min(window.innerHeight - 80, e.clientY - dragOffsetY));
+      currentDragWin.style.left = x + 'px';
+      currentDragWin.style.top = y + 'px';
+    }
+
+    function stopDrag() {
+      isDragging = false;
+      currentDragWin = null;
+      window.removeEventListener('mousemove', onDrag);
+      window.removeEventListener('mouseup', stopDrag);
+    }
+
+    // Terminal Commands
+    const termInput = document.getElementById('termInput');
+    const termHistory = document.getElementById('termHistory');
+
+    termInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const cmd = termInput.value.trim().toLowerCase();
+        if (!cmd) return;
+        const line = document.createElement('div');
+        line.innerHTML = `<span class="prompt">roshan@darwin:~$</span> ${escapeHtml(cmd)}`;
+        termHistory.appendChild(line);
+
+        const out = document.createElement('div');
+        out.style.color = '#94a3b8';
+        switch (cmd) {
+          case 'help':
+            out.innerHTML = `Commands: <strong>projects</strong>, <strong>skills</strong>, <strong>whoami</strong>, <strong>education</strong>, <strong>contact</strong>, <strong>clear</strong>`;
+            break;
+          case 'projects':
+            out.innerHTML = `🚀 Navigating to Right Monitor Projects Showcase...`;
+            setTimeout(switchMonitor, 300);
+            break;
+          case 'whoami':
+            out.innerHTML = `Roshanpreet Singh Dhiman — Full Stack Developer & AI Engineer.`;
+            break;
+          case 'skills':
+            out.innerHTML = `Python, C/C++, Java, TS, React 19, Next.js, Electron, OpenCV, MediaPipe, Ollama.`;
+            break;
+          case 'education':
+            out.innerHTML = `B.E. CSE at Chitkara University (3rd Sem).`;
+            break;
+          case 'contact':
+            out.innerHTML = `Email: roshanpreetsinghdhiman@gmail.com | Phone: +91 96460-65409`;
+            break;
+          case 'clear':
+            termHistory.innerHTML = '';
+            break;
+          default:
+            out.innerHTML = `<span style="color:#ef4444;">Command not found: '${escapeHtml(cmd)}'. Type 'help'.</span>`;
+            break;
+        }
+        if (cmd !== 'clear') termHistory.appendChild(out);
+        termInput.value = '';
+        termHistory.scrollTop = termHistory.scrollHeight;
+      }
+    });
+
+    function escapeHtml(text) {
+      const d = document.createElement('div');
+      d.textContent = text;
+      return d.innerHTML;
+    }
+  </script>
+</body>
+</html>

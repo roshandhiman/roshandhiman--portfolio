@@ -23,7 +23,6 @@ import {
   RUBIK_TARGET,
   LINKEDIN_URL,
   GITHUB_URL,
-  ITCHIO_URL,
 } from "./constants.js";
 
 export default class Navigation {
@@ -90,12 +89,12 @@ export default class Navigation {
       if (this.isCameraMoving) {
         return;
       }
-      if (
-        this.currentStage == "rubikGroup" &&
-        !this.experience.world.rubiksCube.isMoving
-      ) {
+      if (this.currentStage == "rubikGroup") {
+        if (this.experience.world?.rubiksCube) {
+          this.experience.world.rubiksCube.isMoving = false;
+          this.experience.world.rubiksCube.resetOriginalConfig();
+        }
         this.bringSceneBack();
-        this.experience.world.rubiksCube.resetOriginalConfig();
         this.activateScene();
       } else if (
         this.currentStage !== null &&
@@ -405,9 +404,6 @@ export default class Navigation {
         break;
       case "github":
         window.open(GITHUB_URL);
-        break;
-      case "itchio":
-        window.open(ITCHIO_URL);
         break;
     }
   };

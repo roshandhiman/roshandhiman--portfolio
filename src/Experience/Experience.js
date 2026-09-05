@@ -55,7 +55,7 @@ export default class Experience {
     this.config = {};
 
     // Pixel ratio
-    this.config.pixelRatio = Math.min(Math.max(window.devicePixelRatio, 1), 2);
+    this.config.pixelRatio = Math.min(Math.max(window.devicePixelRatio, 1), 1.5);
 
     // Width and height
     const boundings = this.webglElement.getBoundingClientRect();

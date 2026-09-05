@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cyber Space Invaders - Arcade Cabinet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+    body {
+      background: #02040a;
+      color: #00ffcc;
+      font-family: 'Press Start 2P', monospace;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Cabinet Bezel Frame */
+    .arcade-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      background: #050b14;
+      padding: 10px;
+    }
+
+    .arcade-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 16px;
+      background: #091527;
+      border-bottom: 2px solid #00ffcc;
+      font-size: 13px;
+      color: #facc15;
+      text-shadow: 0 0 10px #facc15;
+      z-index: 5;
+      flex-shrink: 0;
+    }
+
+    #arcadeCanvas {
+      background: #030611;
+      border: 2px solid rgba(0, 255, 204, 0.4);
+      box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 255, 204, 0.3);
+      border-radius: 6px;
+      flex: 1;
+      width: 95%;
+      margin: 6px 0;
+      display: block;
+    }
+
+    .arcade-footer {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 16px;
+      background: #091527;
+      border-top: 2px solid #00ffcc;
+      font-size: 10px;
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
+
+    /* Overlay Screens */
+    .overlay-modal {
+      position: absolute;
+      inset: 0;
+      background: rgba(2, 5, 12, 0.92);
+      backdrop-filter: blur(6px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      z-index: 20;
+      text-align: center;
+      padding: 20px;
+    }
+    .game-logo {
+      font-size: 26px;
+      color: #00ffcc;
+      text-shadow: 0 0 15px #00ffcc, 0 0 30px #00ffcc;
+      animation: pulseGlow 2s ease-in-out infinite alternate;
+    }
+    @keyframes pulseGlow {
+      from { transform: scale(0.98); }
+      to { transform: scale(1.02); }
+    }
+    .insert-coin-btn {
+      background: linear-gradient(135deg, #facc15, #ea580c);
+      color: #041221;
+      border: none;
+      padding: 14px 28px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      border-radius: 6px;
+      box-shadow: 0 0 20px #facc15;
+      animation: blinkBtn 0.9s infinite alternate;
+    }
+    @keyframes blinkBtn {
+      from { opacity: 0.8; }
+      to { opacity: 1; transform: scale(1.04); }
+    }
+    .insert-coin-btn:hover {
+      background: #00ffcc;
+      box-shadow: 0 0 25px #00ffcc;
+      color: #000;
+    }
+    .arcade-controls-hint {
+      font-size: 10.5px;
+      color: #cbd5e1;
+      line-height: 1.8;
+      background: rgba(14, 25, 41, 0.8);
+      padding: 10px 16px;
+      border-radius: 6px;
+      border: 1px solid rgba(0, 255, 204, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="arcade-wrapper">
+    <!-- Header -->
+    <div class="arcade-header">
+      <div>SCORE: <span id="scoreText" style="color: #fff;">0000</span></div>
+      <div>HIGH: <span id="highScoreText" style="color: #00ffcc;">5000</span></div>
+      <div>LIVES: <span id="livesText" style="color: #ff007f;">❤❤❤</span></div>
+    </div>
+
+    <!-- Canvas -->
+    <canvas id="arcadeCanvas"></canvas>
+
+    <!-- Footer -->
+    <div class="arcade-footer">
+      <div>CREDITS: <span id="creditsText" style="color: #facc15;">02</span></div>
+      <div>WAVE: <span id="waveText" style="color: #38bdf8;">01</span></div>
+      <div>ROSHAN DHIMAN ARCADE</div>
+    </div>
+
+    <!-- Start / Insert Coin Overlay -->
+    <div class="overlay-modal" id="startOverlay">
+      <div class="game-logo">CYBER GALAGA 2026</div>
+      <div style="font-size: 11px; color: #ff007f;">★ ROSHANPREET SINGH DHIMAN LABS ★</div>
+      
+      <button class="insert-coin-btn" id="startBtn">⚡ INSERT COIN / START ⚡</button>
+      
+      <div class="arcade-controls-hint">
+        [← / →] or [A / D] — MOVE SHIP<br>
+        [SPACEBAR] — FIRE DUAL PHOTON CANNONS<br>
+        DESTROY ALL INVADERS & BOSS FLEETS
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('arcadeCanvas');
+    const ctx = canvas.getContext('2d');
+    const startOverlay = document.getElementById('startOverlay');
+    const startBtn = document.getElementById('startBtn');
+    const scoreText = document.getElementById('scoreText');
+    const highScoreText = document.getElementById('highScoreText');
+    const livesText = document.getElementById('livesText');
+    const waveText = document.getElementById('waveText');
+
+    // Dynamic canvas sizing
+    function resizeCanvas() {
+      const wrapper = canvas.parentElement;
+      const header = wrapper.querySelector('.arcade-header');
+      const footer = wrapper.querySelector('.arcade-footer');
+      const availW = wrapper.clientWidth * 0.95;
+      const availH = wrapper.clientHeight - header.offsetHeight - footer.offsetHeight - 32;
+      canvas.width = Math.floor(availW);
+      canvas.height = Math.floor(availH);
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    let gameRunning = false;
+    let animId = null;
+    let score = 0;
+    let highScore = parseInt(localStorage.getItem('arcade_hiscore') || '5000');
+    let lives = 3;
+    let wave = 1;
+
+    highScoreText.textContent = String(highScore).padStart(4, '0');
+
+    // Player
+    const player = { x: 0, y: 0, w: 36, h: 24, speed: 0 };
+
+    function resetPlayer() {
+      player.w = Math.max(28, canvas.width * 0.05);
+      player.h = player.w * 0.67;
+      player.speed = Math.max(4, canvas.width * 0.01);
+      player.x = canvas.width / 2 - player.w / 2;
+      player.y = canvas.height - player.h - 20;
+    }
+
+    let bullets = [];
+    let enemyBullets = [];
+    let enemies = [];
+    let particles = [];
+    let stars = [];
+    let shootCooldown = 0;
+
+    function initStars() {
+      stars = [];
+      for (let i = 0; i < 70; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          speed: 0.5 + Math.random() * 2.5,
+          size: Math.random() * 2.5
+        });
+      }
+    }
+
+    const keys = {};
+
+    // Direct keyboard input
+    document.addEventListener('keydown', (e) => {
+      const k = e.key.toLowerCase();
+      keys[k] = true;
+      if (k === ' ' && !gameRunning) {
+        e.preventDefault();
+        insertCoinAndStart();
+      }
+      if (k === ' ') e.preventDefault();
+    });
+
+    document.addEventListener('keyup', (e) => {
+      keys[e.key.toLowerCase()] = false;
+    });
+
+    // Parent Three.js key forwarding
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'keyDownParent') {
+        const k = e.data.key.toLowerCase();
+        keys[k] = true;
+        if ((k === ' ' || k === 'enter') && !gameRunning) {
+          insertCoinAndStart();
+        }
+      } else if (e.data && e.data.type === 'keyUpParent') {
+        keys[e.data.key.toLowerCase()] = false;
+      }
+    });
+
+    // Button click start
+    startBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      insertCoinAndStart();
+    });
+
+    function shoot() {
+      if (shootCooldown > 0) return;
+      shootCooldown = 8;
+      const bw = 4, bh = 12, bspeed = Math.max(8, canvas.height * 0.018);
+      bullets.push({ x: player.x + 6, y: player.y, w: bw, h: bh, speed: bspeed });
+      bullets.push({ x: player.x + player.w - 10, y: player.y, w: bw, h: bh, speed: bspeed });
+      try { window.parent.postMessage('select1', '*'); } catch(e) {}
+    }
+
+    function initEnemies() {
+      enemies = [];
+      const rows = Math.min(4 + Math.floor(wave / 3), 6);
+      const cols = Math.min(8, Math.floor(canvas.width / 72));
+      const startX = (canvas.width - cols * 64) / 2;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          enemies.push({
+            x: startX + c * 64,
+            y: 55 + r * 50,
+            w: 36,
+            h: 26,
+            color: r === 0 ? '#facc15' : r % 2 === 0 ? '#ff007f' : '#00ffcc',
+            alive: true
+          });
+        }
+      }
+    }
+
+    function insertCoinAndStart() {
+      if (gameRunning) return;
+      resizeCanvas();
+      score = 0;
+      lives = 3;
+      wave = 1;
+      gameRunning = true;
+      startOverlay.style.display = 'none';
+      resetPlayer();
+      bullets = [];
+      enemyBullets = [];
+      particles = [];
+      shootCooldown = 0;
+      initStars();
+      initEnemies();
+      try { window.parent.postMessage('tetris', '*'); } catch(e) {}
+      updateHUD();
+      if (animId) cancelAnimationFrame(animId);
+      animId = requestAnimationFrame(gameLoop);
+    }
+
+    function gameOver() {
+      gameRunning = false;
+      try { window.parent.postMessage('die', '*'); } catch(e) {}
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('arcade_hiscore', String(highScore));
+      }
+      highScoreText.textContent = String(highScore).padStart(4, '0');
+      startOverlay.style.display = 'flex';
+      startOverlay.querySelector('.game-logo').textContent = 'GAME OVER';
+      startBtn.textContent = '⚡ PLAY AGAIN ⚡';
+    }
+
+    function updateHUD() {
+      scoreText.textContent = String(score).padStart(4, '0');
+      livesText.textContent = '❤'.repeat(Math.max(0, lives));
+      waveText.textContent = String(wave).padStart(2, '0');
+    }
+
+    let enemyDir = 1;
+    let stepTimer = 0;
+    let enemyShootTimer = 0;
+
+    function gameLoop() {
+      if (!gameRunning) return;
+
+      const W = canvas.width;
+      const H = canvas.height;
+
+      // Background
+      ctx.fillStyle = '#030611';
+      ctx.fillRect(0, 0, W, H);
+
+      // Starfield
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      stars.forEach(s => {
+        s.y += s.speed;
+        if (s.y > H) { s.y = 0; s.x = Math.random() * W; }
+        ctx.fillRect(s.x, s.y, s.size, s.size);
+      });
+
+      // Player Movement
+      if (keys['arrowleft'] || keys['a']) {
+        player.x = Math.max(10, player.x - player.speed);
+      }
+      if (keys['arrowright'] || keys['d']) {
+        player.x = Math.min(W - player.w - 10, player.x + player.speed);
+      }
+
+      // Auto-fire when spacebar held
+      if (keys[' ']) {
+        shoot();
+      }
+      if (shootCooldown > 0) shootCooldown--;
+
+      // Draw Player Ship (Galaga style)
+      ctx.fillStyle = '#00ffcc';
+      ctx.beginPath();
+      ctx.moveTo(player.x + player.w / 2, player.y);
+      ctx.lineTo(player.x + player.w, player.y + player.h);
+      ctx.lineTo(player.x + player.w - 6, player.y + player.h - 6);
+      ctx.lineTo(player.x + 6, player.y + player.h - 6);
+      ctx.lineTo(player.x, player.y + player.h);
+      ctx.closePath();
+      ctx.fill();
+
+      // Engine glow
+      ctx.fillStyle = '#ff007f';
+      ctx.fillRect(player.x + player.w / 2 - 3, player.y + player.h - 2, 6, 4);
+
+      // Wing lights
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect(player.x, player.y + player.h - 4, 4, 4);
+      ctx.fillRect(player.x + player.w - 4, player.y + player.h - 4, 4, 4);
+
+      // Player Bullets
+      const bulletSpeed = Math.max(8, H * 0.018);
+      ctx.fillStyle = '#facc15';
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        const b = bullets[i];
+        b.y -= b.speed;
+        ctx.fillRect(b.x, b.y, b.w, b.h);
+        // Bullet glow
+        ctx.fillStyle = 'rgba(250, 204, 21, 0.3)';
+        ctx.fillRect(b.x - 2, b.y - 2, b.w + 4, b.h + 4);
+        ctx.fillStyle = '#facc15';
+
+        // Check enemy collision
+        for (let j = 0; j < enemies.length; j++) {
+          const e = enemies[j];
+          if (e.alive && b.x > e.x && b.x < e.x + e.w && b.y > e.y && b.y < e.y + e.h) {
+            e.alive = false;
+            bullets.splice(i, 1);
+            score += 150;
+            updateHUD();
+            try { window.parent.postMessage('hit', '*'); } catch(err) {}
+
+            // Explosion particles
+            for (let p = 0; p < 12; p++) {
+              particles.push({
+                x: e.x + e.w / 2,
+                y: e.y + e.h / 2,
+                vx: (Math.random() - 0.5) * 8,
+                vy: (Math.random() - 0.5) * 8,
+                color: e.color,
+                life: 25
+              });
+            }
+            break;
+          }
+        }
+
+        if (b.y < -15) {
+          bullets.splice(i, 1);
+        }
+      }
+
+      // Move Enemies
+      stepTimer++;
+      const stepInterval = Math.max(8, 20 - wave * 2);
+      if (stepTimer > stepInterval) {
+        let hitWall = false;
+        enemies.forEach(e => {
+          if (e.alive) {
+            if ((e.x + e.w > W - 20 && enemyDir > 0) || (e.x < 20 && enemyDir < 0)) {
+              hitWall = true;
+            }
+          }
+        });
+
+        if (hitWall) {
+          enemyDir = -enemyDir;
+          enemies.forEach(e => { if (e.alive) e.y += 14; });
+        } else {
+          enemies.forEach(e => { if (e.alive) e.x += enemyDir * 12; });
+        }
+        stepTimer = 0;
+      }
+
+      // Enemy shooting
+      enemyShootTimer++;
+      const shootInterval = Math.max(20, 60 - wave * 5);
+      if (enemyShootTimer > shootInterval) {
+        const aliveEnemies = enemies.filter(e => e.alive);
+        if (aliveEnemies.length > 0) {
+          const shooter = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
+          enemyBullets.push({
+            x: shooter.x + shooter.w / 2 - 2,
+            y: shooter.y + shooter.h,
+            w: 4,
+            h: 10,
+            speed: Math.max(4, H * 0.008) + wave * 0.5
+          });
+        }
+        enemyShootTimer = 0;
+      }
+
+      // Enemy bullets
+      ctx.fillStyle = '#ff007f';
+      for (let i = enemyBullets.length - 1; i >= 0; i--) {
+        const eb = enemyBullets[i];
+        eb.y += eb.speed;
+        ctx.fillRect(eb.x, eb.y, eb.w, eb.h);
+
+        // Hit player?
+        if (
+          eb.x < player.x + player.w &&
+          eb.x + eb.w > player.x &&
+          eb.y < player.y + player.h &&
+          eb.y + eb.h > player.y
+        ) {
+          enemyBullets.splice(i, 1);
+          lives--;
+          updateHUD();
+          // Player hit particles
+          for (let p = 0; p < 15; p++) {
+            particles.push({
+              x: player.x + player.w / 2,
+              y: player.y + player.h / 2,
+              vx: (Math.random() - 0.5) * 10,
+              vy: (Math.random() - 0.5) * 10,
+              color: '#00ffcc',
+              life: 30
+            });
+          }
+          if (lives <= 0) {
+            gameOver();
+            return;
+          }
+          continue;
+        }
+
+        if (eb.y > H + 10) {
+          enemyBullets.splice(i, 1);
+        }
+      }
+
+      // Draw Enemies
+      let aliveCount = 0;
+      enemies.forEach(e => {
+        if (e.alive) {
+          aliveCount++;
+          ctx.fillStyle = e.color;
+          // Body
+          ctx.fillRect(e.x, e.y, e.w, e.h);
+          // Eyes
+          ctx.fillStyle = '#030611';
+          ctx.fillRect(e.x + 6, e.y + 6, 6, 6);
+          ctx.fillRect(e.x + e.w - 12, e.y + 6, 6, 6);
+          // Antenna
+          ctx.fillStyle = e.color;
+          ctx.fillRect(e.x + 4, e.y - 4, 3, 5);
+          ctx.fillRect(e.x + e.w - 7, e.y - 4, 3, 5);
+
+          // Check if enemy reached player row
+          if (e.y + e.h > player.y) {
+            gameOver();
+          }
+        }
+      });
+
+      // Wave cleared
+      if (aliveCount === 0) {
+        wave++;
+        score += 1000;
+        updateHUD();
+        try { window.parent.postMessage('tetris', '*'); } catch(err) {}
+        enemyBullets = [];
+        initEnemies();
+      }
+
+      // Render & update particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.96;
+        p.vy *= 0.96;
+        p.life--;
+        const alpha = Math.max(0, p.life / 25);
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, 4, 4);
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+      ctx.globalAlpha = 1;
+
+      // Score display on canvas (always visible)
+      ctx.fillStyle = 'rgba(0,255,204,0.3)';
+      ctx.font = '10px "Press Start 2P", monospace';
+      ctx.fillText('WAVE ' + wave, 10, H - 10);
+
+      animId = requestAnimationFrame(gameLoop);
+    }
+
+    // Focus the document so keyboard works immediately
+    document.body.tabIndex = 0;
+    document.body.focus();
+  </script>
+</body>
+</html>
+

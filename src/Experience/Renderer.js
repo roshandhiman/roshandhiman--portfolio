@@ -99,7 +99,7 @@ export default class Renderer {
       this.config.width,
       this.config.height,
       {
-        samples: this.instance.getPixelRatio() >= 2 ? 8 : 4,
+        samples: 2,
         generateMipmaps: false,
         minFilter: LinearFilter,
         magFilter: LinearFilter,

@@ -97,12 +97,19 @@ export default class RightMonitorScreen {
   }
 
   activateControls() {
+    if (this.cssRightMonitorScene) {
+      const el = document.getElementById("cssRightMonitor");
+      if (el) el.style.pointerEvents = "auto";
+    }
     window.addEventListener("pointermove", this.onMouseMove, false);
     window.addEventListener("message", this.receiveMessage, false);
     this.onMouseMove();
     this.isActive = true;
   }
   deactivateControls() {
+    const el = document.getElementById("cssRightMonitor");
+    if (el) el.style.pointerEvents = "none";
+    if (this.webglElement) this.webglElement.style.pointerEvents = "auto";
     window.removeEventListener("pointermove", this.onMouseMove, false);
     window.removeEventListener("message", this.receiveMessage, false);
     this.isActive = false;

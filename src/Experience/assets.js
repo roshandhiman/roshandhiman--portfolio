@@ -50,6 +50,11 @@ export default [
       { name: "github", source: "/assets/models/github.glb" },
       { name: "itchio", source: "/assets/models/itchio.glb" },
       {
+        name: "profilePhoto",
+        source: "/assets/images/profile.jpg",
+        type: "texture",
+      },
+      {
         name: "cubeTexture",
         source: [
           "/assets/environmentMaps/nx.jpg",
